@@ -24,6 +24,7 @@ console = Console()
   
 class AgentDetail(BaseModel):
     """Agent configuration details.
+
     Args:
         method (str): Name of the agent method to use (swe_agent/code_agent)
         batch (int): Number of parallel executions for this agent type
@@ -34,12 +35,12 @@ class AgentDetail(BaseModel):
     method: str
     batch: int
     model: str
-    llm_base_url: Optional[str] = None
-    llm_api_key: Optional[str] = None
-  
-  
+    llm_base_url: str = None
+    llm_api_key: str = None
+
 class AgentRequest(BaseModel):
     """Main request structure for batch execution endpoint.
+
     Args:
         prompt (str): Instruction prompt for agents to execute
         org (str): Source organization name
@@ -47,10 +48,10 @@ class AgentRequest(BaseModel):
         agents (list[AgentDetail]): List of agent configurations
     """
     prompt: str
-    org: Optional[str] = None
-    repo: Optional[str] = None
-    agents: List[AgentDetail]
-    gh_token: Optional[str] = None
+    org: str = None
+    repo: str = None
+    agents: list[AgentDetail]
+    gh_token: str = None
     source_branch: str = "main"
     target_branch: str = "main"
     branch_prefix: str = "agent_router"
@@ -173,7 +174,10 @@ def execute_run_command(prompt: str, current_settings: Dict[str, Any],
         org=current_settings['org'],
         repo=current_settings['repo'],
         agents=[AgentDetail(**a) for a in agents],
-        gh_token=config.get("defaults", {}).get("gh_token")
+        gh_token=config.get("defaults", {}).get("gh_token"),
+        source_branch=current_settings['source_branch'],
+        target_branch=current_settings['target_branch'],
+        branch_prefix=current_settings['branch_prefix']
     )
     # Check if we should execute remotely
     if remotes:
@@ -211,11 +215,11 @@ def interactive_cli(config_path: str = "agent_config.yaml"):
     defaults = config.get('defaults', {})
     # Current values
     current_settings = {
-        "model": defaults.get('model', "gpt-4"),
-        "batch": defaults.get('batch', 1),
-        "method": defaults.get('method', "swe_agent_default"),
         "org": defaults.get('org', "interactive"),
         "repo": defaults.get('repo', "cli"),
+        "source_branch": defaults.get('source_branch', "main"),
+        "target_branch": defaults.get('target_branch', "main"),
+        "branch_prefix": defaults.get('branch_prefix', "agent_router"),
     }
     remotes = config.get('remotes', [])
     # Set up prompt toolkit
@@ -251,39 +255,6 @@ def interactive_cli(config_path: str = "agent_config.yaml"):
                 args = cmd_parts[1] if len(cmd_parts) > 1 else ""
                 if cmd == "help":
                     display_help()
-                elif cmd == "method":
-                    if args:
-                        current_settings["method"] = args
-                        console.print(f"[green]Method set to:[/green] {current_settings['method']}")
-                    else:
-                        console.print(f"[blue]Current method:[/blue] {current_settings['method']}")
-                elif cmd == "model":
-                    if args:
-                        current_settings["model"] = args
-                        console.print(f"[green]Model set to:[/green] {current_settings['model']}")
-                    else:
-                        console.print(f"[blue]Current model:[/blue] {current_settings['model']}")
-                elif cmd == "batch":
-                    if args:
-                        try:
-                            current_settings["batch"] = int(args)
-                            console.print(f"[green]Batch set to:[/green] {current_settings['batch']}")
-                        except ValueError:
-                            console.print("[red]Batch value must be a number[/red]")
-                    else:
-                        console.print(f"[blue]Current batch:[/blue] {current_settings['batch']}")
-                elif cmd == "org":
-                    if args:
-                        current_settings["org"] = args
-                        console.print(f"[green]Organization set to:[/green] {current_settings['org']}")
-                    else:
-                        console.print(f"[blue]Current organization:[/blue] {current_settings['org']}")
-                elif cmd == "repo":
-                    if args:
-                        current_settings["repo"] = args
-                        console.print(f"[green]Repository set to:[/green] {current_settings['repo']}")
-                    else:
-                        console.print(f"[blue]Current repository:[/blue] {current_settings['repo']}")
                 elif cmd == "run":
                     if args:
                         # Use everything after "/run " as the prompt
@@ -362,37 +333,3 @@ def interactive_cli(config_path: str = "agent_config.yaml"):
             console.print(f"[red]Error:[/red] {str(e)}")
   
   
-if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description='Run interactive CLI with a specified config file')
-    parser.add_argument('--config',
-                      type=str,
-                      default="agent_config.yaml",
-                      help='Path to the agent configuration YAML file (default: agent_config.yaml)')
-    parser.add_argument('--prompt',
-                      type=str,
-                      help='Directly execute with this prompt instead of entering interactive mode')
-    args = parser.parse_args()
-    if args.prompt:
-        # Load configuration
-        config = load_config(args.config)
-        defaults = config.get('defaults', {})
-        # Current values
-        current_settings = {
-            "model": defaults.get('model', "gpt-4"),
-            "batch": defaults.get('batch', 1),
-            "method": defaults.get('method', "swe_agent_default"),
-            "org": defaults.get('org', "interactive"),
-            "repo": defaults.get('repo', "cli"),
-        }
-        remotes = config.get('remotes', [])
-        # Execute directly with the provided prompt
-        execute_run_command(
-            prompt=args.prompt,
-            current_settings=current_settings,
-            config=config,
-            remotes=remotes,
-            session=PromptSession()
-        )
-    else:
-        interactive_cli(args.config)

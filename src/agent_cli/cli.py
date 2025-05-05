@@ -13,19 +13,31 @@ def main():
     parser.add_argument('--prompt',
                         type=str,
                         help='Directly execute with this prompt instead of entering interactive mode')
+    parser.add_argument('--source-branch',
+                        type=str,
+                        help='Source branch for the operation')
+    parser.add_argument('--target-branch',
+                        type=str,
+                        help='Target branch for the operation')
+    parser.add_argument('--branch-prefix',
+                        type=str,
+                        help='Branch prefix for the operation')
     args = parser.parse_args()
-
+    
     if args.prompt:
         # Load configuration
         config = load_config(args.config)
         defaults = config.get('defaults', {})
         # Current values
         current_settings = {
-            "model": defaults.get('model', "gpt-4"),
-            "batch": defaults.get('batch', 1),
-            "method": defaults.get('method', "swe_agent_default"),
             "org": defaults.get('org', "interactive"),
             "repo": defaults.get('repo', "cli"),
+            "method": defaults.get('method', "swe_agent"),
+            "batch": defaults.get('batch', 1),
+            "model": defaults.get('model', "gpt-4"),
+            "source_branch": args.source_branch or defaults.get('source_branch', "main"),
+            "target_branch": args.target_branch or defaults.get('target_branch', "main"),
+            "branch_prefix": args.branch_prefix or defaults.get('branch_prefix', "agent_router"),
         }
         remotes = config.get('remotes', [])
         # Execute directly with the provided prompt
