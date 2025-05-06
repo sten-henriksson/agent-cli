@@ -28,11 +28,7 @@ pipx install git+https://github.com/sten-henriksson/agent-cli.git
 ```bash
 pip install git+https://github.com/sten-henriksson/agent-cli.git
 ```
-
-## Configuration
-
-Create a YAML configuration file (`agent_config.yaml` by default) with your settings:
-# getting gh token
+## getting gh token
 1. Go to https://github.com/settings/personal-access-tokens.
 2. set the repo/repos and org.
 3. update scope to pull and content.
