@@ -33,7 +33,11 @@ pip install git+https://github.com/sten-henriksson/agent-cli.git
 
 Create a YAML configuration file (`agent_config.yaml` by default) with your settings:
 # getting gh token
-1. Go to 
+1. Go to https://github.com/settings/personal-access-tokens.
+2. set the repo/repos and org.
+3. update scope to pull and content.
+
+
 ![image](https://github.com/user-attachments/assets/94558f67-c1e4-495b-9cbe-416607bb8361)
 ![image](https://github.com/user-attachments/assets/2ab44e29-504c-45f6-8536-7bf472859b11)
 
