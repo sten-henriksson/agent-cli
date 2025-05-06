@@ -32,6 +32,10 @@ pip install git+https://github.com/sten-henriksson/agent-cli.git
 ## Configuration
 
 Create a YAML configuration file (`agent_config.yaml` by default) with your settings:
+# getting gh token
+1. Go to 
+![image](https://github.com/user-attachments/assets/94558f67-c1e4-495b-9cbe-416607bb8361)
+![image](https://github.com/user-attachments/assets/2ab44e29-504c-45f6-8536-7bf472859b11)
 
 ```yaml
 defaults:
